@@ -1,0 +1,89 @@
+/* Color de fondo de Plantilla Base */
+
+body {
+    background-color: aliceblue;
+}
+
+/* Color de fondo de Navbar Plantilla Base */
+
+.menu{
+    background-color: #0f538f;
+
+}
+
+
+/* ======== LOGIN PAGE ESTILO TIPO BANCOESTADO ======== */
+
+.login-card {
+    max-width: 400px;
+    width: 100%;
+    border: none;
+    border-radius: 12px;
+    background-color: #ffffff;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+}
+
+.btn-login {
+    background-color: #F39200; /* Naranja BancoEstado */
+    color: white;
+    font-weight: bold;
+    border-radius: 8px;
+    padding: 10px;
+    border: none;
+    transition: background-color 0.3s ease;
+}
+
+.btn-login:hover {
+    background-color: #B02B2C; /* Rojo BancoEstado */
+}
+
+.login-card .form-control {
+    border-radius: 8px;
+    border: 1px solid #ced4da;
+    box-shadow: none;
+}
+
+.login-card .form-label {
+    font-weight: 600;
+    color: #4D4D4D;
+}
+
+
+
+
+
+/* ======== REGISTRO PAGE ESTILO TIPO BANCO ESTADO ======== */
+
+.register-card {
+    max-width: 500px;
+    width: 100%;
+    border: none;
+    border-radius: 12px;
+    background-color: #ffffff;
+    transition: all 0.3s ease;
+}
+
+.btn-register {
+    background-color: #F39200;
+    color: white;
+    font-weight: bold;
+    border-radius: 8px;
+    padding: 10px;
+    transition: background-color 0.3s ease;
+    border: none;
+}
+
+.btn-register:hover {
+    background-color: #B02B2C;
+}
+
+
+.register-card .form-control {
+    border-radius: 8px;
+    border: 1px solid #ced4da;
+}
+
+.register-card .form-label {
+    font-weight: 600;
+}

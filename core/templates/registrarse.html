@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Registro de Usuario{% endblock %}
+
+
+
+{% block content %}
+<div class="container d-flex justify-content-center align-items-center" style="min-height: 90vh;">
+  <div class="card register-card p-4 shadow">
+    <h3 class="text-center mb-4 text-primary">Crea tu cuenta</h3>
+
+    <form method="post" action="{% url 'registrarse' %}">
+      {% csrf_token %}
+      <div class="mb-3">
+        <label for="nombre" class="form-label">Nombre completo</label>
+        <input type="text" class="form-control" id="nombre" name="nombre" placeholder="Ej: Juan Pérez" required>
+      </div>
+      <div class="mb-3">
+        <label for="email" class="form-label">Correo electrónico</label>
+        <input type="email" class="form-control" id="email" name="email" placeholder="ejemplo@correo.com" required>
+      </div>
+      <div class="mb-3">
+        <label for="password1" class="form-label">Contraseña</label>
+        <input type="password" class="form-control" id="password1" name="password1" placeholder="********" required>
+      </div>
+      <div class="mb-3">
+        <label for="password2" class="form-label">Repetir contraseña</label>
+        <input type="password" class="form-control" id="password2" name="password2" placeholder="********" required>
+      </div>
+      <div class="d-grid">
+        <button type="submit" class="btn btn-register">Registrarse</button>
+      </div>
+    </form>
+
+    <div class="mt-3 text-center">
+      <p class="text-secondary">¿Ya tienes cuenta?
+        <a href="{% url 'login' %}" class="text-decoration-none text-primary fw-bold">Inicia sesión</a>
+      </p>
+    </div>
+  </div>
+</div>
+{% endblock %}
