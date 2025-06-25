@@ -33,7 +33,7 @@
         </li>
         {% if user.is_authenticated %}
         <li class="nav-item">
-          <a class="nav-link" href="javascript:void(0)">Oportunidades</a>
+          <a class="nav-link" href="{% url 'oportunidades' %}">Oportunidades</a>
         </li>
         <li class="nav-item">
           <a class="nav-link" href="javascript:void(0)">Link</a>
@@ -41,19 +41,27 @@
         {% endif %}
       </ul>
 
-      <form class="d-flex">
-        <input class="form-control me-2" type="text" placeholder="Buscar..." style="margin-right: 400px;">
-        <button class="btn btn-primary" type="button" style="margin-right: 400px;">Buscar</button>
-      </form>
 
       {% if user.is_authenticated %}
-        <span class="navbar-text text-white me-3">
-          Bienvenido, {{ user.username }}
-        </span>
-        <a href="{% url 'logout' %}">
-          <button type="button" class="btn btn-outline-light">Cerrar sesión</button>
-        </a>
-      {% else %}
+        <ul class="navbar-nav me-3">
+          <li class="nav-item dropdown">
+            <button class="btn btn-light dropdown-toggle" type="button" id="usuarioDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+              {{ user.username|capfirst }}
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="usuarioDropdown">
+              {% if user.is_staff %}
+                <a class="dropdown-item" href="{% url 'lista_ofertas' %}">Publicaciones</a>
+              {% else %}
+                <li><a class="dropdown-item" href="{% url 'perfil' %}">Mi Perfil</a></li>
+                <li><a class="dropdown-item" href="{% url 'mi_curriculum' %}">Mi Currículum</a></li>
+                <li><a class="dropdown-item" href="{% url 'mis_postulaciones' %}">Mis Postulaciones</a></li>
+              {% endif %}
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item text-danger" href="{% url 'logout' %}">Cerrar sesión</a></li>
+            </ul>
+          </li>
+        </ul>
+        {% else %}
         <a href="{% url 'registrarse' %}">
           <button type="button" class="btn btn-outline-warning me-2">Crea tu cuenta</button>
         </a>
@@ -64,6 +72,8 @@
     </div>
   </div>
 </nav>
+
+
 
 <!-- Mensajes -->
 {% if messages %}

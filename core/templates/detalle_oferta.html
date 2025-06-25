@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+  <h2>{{ oferta.titulo }}</h2>
+  <p><strong>Modalidad:</strong> {{ oferta.modalidad }}</p>
+  <p><strong>Fecha publicación:</strong> {{ oferta.fecha_publicacion }}</p>
+  <p><strong>Descripción:</strong></p>
+  <p>{{ oferta.descripcion|linebreaks }}</p>
+
+  <a href="{% url 'oportunidades' %}" class="btn btn-secondary mt-3">Volver a Oportunidades</a>
+</div>
+{% endblock %}
