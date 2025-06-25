@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block title %}Publicaciones{% endblock %}
+{% block content %}
+<div class="container mt-4">
+  <h2>Publicaciones de Práctica</h2>
+  <a href="{% url 'crear_oferta' %}" class="btn btn-success mb-3">Nueva Publicación</a>
+  <table class="table table-bordered">
+    <thead>
+      <tr>
+        <th>Título</th>
+        <th>Modalidad</th>
+        <th>Fecha</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for oferta in ofertas %}
+      <tr>
+        <td>{{ oferta.titulo }}</td>
+        <td>{{ oferta.modalidad }}</td>
+        <td>{{ oferta.fecha_publicacion }}</td>
+        <td>
+          <a href="{% url 'editar_oferta' oferta.id %}" class="btn btn-primary btn-sm">Editar</a>
+          <a href="{% url 'eliminar_oferta' oferta.id %}" class="btn btn-danger btn-sm">Eliminar</a>
+        </td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="4">No hay publicaciones aún.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

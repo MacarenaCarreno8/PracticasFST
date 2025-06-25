@@ -49,7 +49,9 @@ body {
     color: #4D4D4D;
 }
 
-
+.dropdown-menu {
+  z-index: 1050 !important; /* Bootstrap usa 1050 para dropdown */
+}
 
 
 
@@ -86,4 +88,18 @@ body {
 
 .register-card .form-label {
     font-weight: 600;
+}
+
+/* ======== CARRUSEL INDEX ======== */
+
+/* Limita la altura del carrusel */
+.custom-carousel {
+  height: 150px;  /* Cambia esto según lo que necesites */
+  overflow: hidden;
+}
+
+.custom-carousel .carousel-item img {
+  height: 100% !important;         /* Ajusta a lo mismo que el contenedor */
+  object-fit: cover;     /* Esto recorta en lugar de deformar */
+  width: 100% !important;
 }

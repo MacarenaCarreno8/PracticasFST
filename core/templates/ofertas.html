@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block title %}Ofertas Laborales{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+  <h2 class="mb-4">Ofertas Laborales Disponibles</h2>
+
+  {% if ofertas %}
+    <div class="list-group">
+      {% for oferta in ofertas %}
+        <div class="list-group-item">
+          <h5>{{ oferta.titulo }}</h5>
+          <p>{{ oferta.descripcion }}</p>
+          <p><strong>Modalidad:</strong> {{ oferta.modalidad }}</p>
+          <form action="{% url 'postular_oferta' oferta.id %}" method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-primary">Postular</button>
+          </form>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="alert alert-info">No hay ofertas disponibles actualmente.</div>
+  {% endif %}
+</div>
+{% endblock %}
