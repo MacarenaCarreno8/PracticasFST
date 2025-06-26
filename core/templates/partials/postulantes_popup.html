@@ -1,0 +1,20 @@
+<h4>Postulantes para: {{ oferta.titulo }}</h4>
+{% if postulantes %}
+  <ul class="list-group">
+    {% for postulacion in postulantes %}
+      <li class="list-group-item d-flex justify-content-between align-items-center">
+        {{ postulacion.estudiante.get_full_name|default:postulacion.estudiante.username }}
+        <div>
+          <a href="{% url 'perfil_usuario_admin' postulacion.estudiante.id %}" class="btn btn-sm btn-info" target="_blank">Ver Perfil</a>
+          {% if postulacion.estudiante.perfil.curriculum_pdf %}
+            <a href="{{ postulacion.estudiante.perfil.curriculum_pdf.url }}" class="btn btn-sm btn-secondary" download>Ver CV</a>
+          {% endif %}
+          <a href="{% url 'cambiar_estado_postulacion' postulacion.id %}?estado=aceptado" class="btn btn-sm btn-success">Aceptar</a>
+          <a href="{% url 'cambiar_estado_postulacion' postulacion.id %}?estado=rechazado" class="btn btn-sm btn-danger">Rechazar</a>
+        </div>
+      </li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <p>No hay postulantes para esta oferta.</p>
+{% endif %}

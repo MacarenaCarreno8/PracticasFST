@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <!-- Card lateral -->
+        <div class="col-md-4">
+        <div class="card text-center">
+            <div class="card-body">
+            {% if perfil.foto %}
+                <img src="{{ perfil.foto.url }}" class="rounded-circle mb-3" width="120" height="120">
+            {% else %}
+                <img src="{% static 'img/avatar-default.png' %}" class="rounded-circle mb-3" width="120" height="120">
+            {% endif %}
+            <h5 class="card-title">{{ perfil.nombres|default:"Usuario" }}</h5>
+            <p class="text-muted">{{ perfil.carrera|default:"Sin carrera definida" }}</p>
+            <hr>
+            <div class="list-group text-start">
+                <a href="#" class="list-group-item list-group-item-action active" onclick="mostrarSeccion('personales')">Datos Personales</a>
+                <a href="#" class="list-group-item list-group-item-action" onclick="mostrarSeccion('academicos')">Datos Académicos</a>
+                <a href="#" class="list-group-item list-group-item-action" onclick="mostrarSeccion('adicionales')">Datos Adicionales</a>
+                <a href="#" class="list-group-item list-group-item-action" onclick="mostrarSeccion('habilidades')">Habilidades</a>
+                <a href="#" class="list-group-item list-group-item-action" onclick="mostrarSeccion('interes')">Área de interés</a>
+                <a href="#" class="list-group-item list-group-item-action" onclick="mostrarSeccion('documentos')">Cargar Documentos</a>
+                </div>
+            </div>
+        </div>
+        </div>
+
+    <!-- Card principal -->
+    <div class="col-md-8">
+        <!-- Datos Personales -->
+        <div id="seccion-personales" class="seccion-activa">
+            <div class="card">
+            <div class="card-header">
+                <h4>Datos Personales</h4>
+                <small class="text-muted">Actualiza tu información personal.</small>
+            </div>
+            <div class="card-body">
+                <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                {{ form_personales.as_p }}
+                <button type="submit" name="guardar_personales" class="btn btn-primary mt-2">Guardar Cambios</button>
+                </form>
+            </div>
+            </div>
+        </div>
+
+        <!-- Datos Académicos -->
+        <div id="seccion-academicos" class="d-none">
+            <div class="card">
+            <div class="card-header">
+                <h4>Datos Académicos</h4>
+                <small class="text-muted">Actualiza tu información académica.</small>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                {% csrf_token %}
+                {{ form_academicos.as_p }}
+                <button type="submit" name="guardar_academicos" class="btn btn-primary mt-2">Guardar Cambios</button>
+                </form>
+            </div>
+            </div>
+        </div>
+    
+            <!-- Datos Adicionales -->
+        <div id="seccion-adicionales" class="d-none">
+            <div class="card">
+                <div class="card-header">
+                <h4>Datos Adicionales</h4>
+                <small class="text-muted">Actualiza tu información adicional.</small>
+                </div>
+                <div class="card-body">
+                <form method="POST">
+                    {% csrf_token %}
+                    {{ form_adicionales.as_p }}
+                    <button type="submit" name="guardar_adicionales" class="btn btn-primary mt-2">Guardar Cambios</button>
+                </form>
+                </div>
+            </div>
+        </div>
+        <!-- Habilidades -->
+        <div id="seccion-habilidades" class="d-none">
+            <div class="card">
+            <div class="card-header">
+                <h4>Habilidades</h4>
+                <small class="text-muted">Actualiza tus niveles de habilidad.</small>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                {% csrf_token %}
+                {{ form_habilidades.as_p }}
+                <button type="submit" name="guardar_habilidades" class="btn btn-primary mt-2">Guardar Cambios</button>
+                </form>
+            </div>
+            </div>
+        </div>
+
+                <!-- Área de interés -->
+        <div id="seccion-interes" class="d-none">
+            <div class="card">
+                <div class="card-header">
+                    <h4>Áreas de Interés</h4>
+                    <small class="text-muted">Selecciona todas las áreas de tu interés. Debes seleccionar al menos un área.</small>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        {% csrf_token %}
+                        {% for checkbox in form_interes.areas_interes %}
+                            <div class="form-check">
+                                {{ checkbox.tag }}
+                                <label class="form-check-label" for="{{ checkbox.id_for_label }}">
+                                    {{ checkbox.choice_label }}
+                                </label>
+                            </div>
+                        {% empty %}
+                            <p>No hay áreas disponibles para seleccionar.</p>
+                        {% endfor %}
+                        <button type="submit" name="guardar_interes" class="btn btn-primary mt-2">Guardar Cambios</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <script>
+        function mostrarSeccion(seccion) {
+        // Oculta todas las secciones dentro de la columna derecha
+        document.querySelectorAll('.col-md-8 > div').forEach(div => {
+            div.classList.add('d-none');
+        });
+
+        // Remueve la clase activa de los botones del menú lateral
+        document.querySelectorAll('.list-group-item').forEach(item => {
+            item.classList.remove('active');
+        });
+
+        // Muestra solo la sección seleccionada
+        const seccionActiva = document.getElementById('seccion-' + seccion);
+        if (seccionActiva) {
+            seccionActiva.classList.remove('d-none');
+        }
+
+        // Agrega clase activa al enlace clickeado
+        event.target.classList.add('active');
+        }
+    </script>
+{% endblock %}

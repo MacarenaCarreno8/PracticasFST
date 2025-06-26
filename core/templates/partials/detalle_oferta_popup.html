@@ -1,0 +1,12 @@
+{% if oferta %}
+    <h3>{{ oferta.titulo }}</h3>
+    <p><strong>Descripción:</strong> {{ oferta.descripcion }}</p>
+    <p><strong>Modalidad:</strong> {{ oferta.modalidad }}</p>
+    <p><strong>Fecha de publicación:</strong> {{ oferta.fecha_publicacion }}</p>
+
+    <button class="btn btn-primary mt-3" onclick="abrirModalPostulantes({{ oferta.id }})">Ver postulantes</button>
+    {% else %}
+    <div class="alert alert-danger">
+        Error: No se encontró la oferta o no tienes permisos para verla.
+    </div>
+{% endif %}

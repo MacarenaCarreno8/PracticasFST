@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">Mis Postulaciones</h4>
+        </div>
+        <div class="card-body">
+            <!-- Buscador -->
+            <form method="GET" class="mb-3">
+                <div class="input-group">
+                    <input type="text" name="search" class="form-control" placeholder="Buscar por título de oferta..." value="{{ search }}">
+                    <button class="btn btn-outline-secondary" type="submit">Buscar</button>
+                </div>
+            </form>
+
+            {% if postulaciones %}
+                <div class="table-responsive">
+                    <table class="table table-striped table-bordered align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Oferta</th>
+                                <th>Fecha de postulación</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for postulacion in postulaciones %}
+                            <tr>
+                                <td>{{ postulacion.oferta.titulo }}</td>
+                                <td>{{ postulacion.fecha_postulacion|date:"d M Y" }}</td>
+                                <td>
+                                    {% if postulacion.estado %}
+                                        {{ postulacion.estado }}
+                                    {% else %}
+                                        En revisión
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <form method="POST" action="{% url 'eliminar_postulacion' postulacion.id %}" onsubmit="return confirm('¿Estás seguro de que deseas eliminar esta postulación?');">
+                                        {% csrf_token %}
+                                        <button class="btn btn-sm btn-danger" title="Eliminar">
+                                            🗑️
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="alert alert-info">
+                    No has postulado a ninguna oferta aún.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

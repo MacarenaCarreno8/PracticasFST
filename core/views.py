@@ -6,9 +6,10 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth import authenticate, login as auth_login
 from django.contrib.admin.views.decorators import staff_member_required
-from django.db.models import Q
-from .models import Postulacion, OfertaLaboral
-from .forms import OfertaLaboralForm
+from django.http import HttpResponseRedirect
+from django.views.decorators.http import require_POST
+from .models import Postulacion, OfertaLaboral, Perfil, Postulacion
+from .forms import OfertaLaboralForm, PerfilFormPersonales, PerfilFormAcademicos, PerfilFormAdicionales, PerfilFormHabilidades, PerfilFormAreasInteres
 
 
 def index (request):
@@ -66,11 +67,106 @@ def oportunidades(request):
 
 def detalle_oferta(request, pk):
     oferta = get_object_or_404(OfertaLaboral, pk=pk)
-    return render(request, 'detalle_oferta.html', {'oferta': oferta})
+
+    ya_postulado = False
+    if request.user.is_authenticated and not request.user.is_staff:
+        ya_postulado = Postulacion.objects.filter(estudiante=request.user, oferta=oferta).exists()
+
+    return render(request, 'detalle_oferta.html', {
+        'oferta': oferta,
+        'ya_postulado': ya_postulado
+    })
+
+@staff_member_required
+def ver_postulantes_oferta(request, oferta_id):
+    oferta = get_object_or_404(OfertaLaboral, pk=oferta_id)
+    postulaciones = Postulacion.objects.filter(oferta=oferta).select_related('estudiante')
+
+    return render(request, 'admin_ofertas/postulantes.html', {
+        'oferta': oferta,
+        'postulaciones': postulaciones
+    })
+
+@staff_member_required
+def perfil_usuario_admin(request, user_id):
+    usuario = get_object_or_404(User, pk=user_id)
+    return render(request, 'admin_ofertas/perfil_usuario.html', {'usuario': usuario})
+
+@login_required
+def postular_oferta(request, oferta_id):
+    oferta = get_object_or_404(OfertaLaboral, id=oferta_id)
+    usuario = request.user
+
+    # Verifica si ya está postulado
+    ya_postulado = Postulacion.objects.filter(estudiante=usuario, oferta=oferta).exists()
+    if ya_postulado:
+        messages.warning(request, 'Ya has postulado a esta oferta.')
+    else:
+        Postulacion.objects.create(estudiante=usuario, oferta=oferta)
+        messages.success(request, 'Has postulado exitosamente.')
+
+    return redirect('detalle_oferta', pk=oferta_id)
 
 @login_required
 def perfil_usuario(request):
-    return render(request, 'perfil.html')
+    perfil, creado = Perfil.objects.get_or_create(user=request.user)
+
+    if request.method == 'POST':
+        form_personales = PerfilFormPersonales(request.POST, request.FILES, instance=perfil)
+        form_academicos = PerfilFormAcademicos(request.POST, instance=perfil)
+        form_adicionales = PerfilFormAdicionales(request.POST, instance=perfil)
+        form_habilidades = PerfilFormHabilidades(request.POST, instance=perfil)
+        form_interes = PerfilFormAreasInteres(request.POST, instance=perfil)
+
+        if 'guardar_personales' in request.POST:
+            if form_personales.is_valid():
+                form_personales.save()
+                messages.success(request, 'Datos personales actualizados correctamente.')
+                return redirect('perfil_usuario')
+
+        elif 'guardar_academicos' in request.POST:
+            if form_academicos.is_valid():
+                form_academicos.save()
+                messages.success(request, 'Datos académicos actualizados correctamente.')
+                return redirect('perfil_usuario')
+
+        elif 'guardar_adicionales' in request.POST:
+            if form_adicionales.is_valid():
+                form_adicionales.save()
+                messages.success(request, 'Datos adicionales actualizados correctamente.')
+                return redirect('perfil_usuario')
+
+        elif 'guardar_habilidades' in request.POST:
+            if form_habilidades.is_valid():
+                form_habilidades.save()
+                messages.success(request, 'Datos de habilidades actualizados correctamente.')
+                return redirect('perfil_usuario')
+
+        elif 'guardar_interes' in request.POST:
+            if form_interes.is_valid():
+                form_interes.save()
+                messages.success(request, 'Áreas de interés actualizadas correctamente.')
+                return redirect('perfil_usuario')
+
+    else:
+        form_personales = PerfilFormPersonales(instance=perfil)
+        form_academicos = PerfilFormAcademicos(instance=perfil)
+        form_adicionales = PerfilFormAdicionales(instance=perfil)
+        form_habilidades = PerfilFormHabilidades(instance=perfil)
+        form_interes = PerfilFormAreasInteres(instance=perfil)
+
+    context = {
+        'perfil': perfil,
+        'form_personales': form_personales,
+        'form_academicos': form_academicos,
+        'form_adicionales': form_adicionales,
+        'form_habilidades': form_habilidades,
+        'form_interes': form_interes,
+    }
+
+    return render(request, 'perfil.html', context)
+
+
 
 @staff_member_required
 def publicaciones_admin(request):
@@ -183,3 +279,73 @@ def eliminar_oferta(request, pk):
         oferta.delete()
         return redirect('lista_ofertas')
     return render(request, 'admin_ofertas/confirmar_eliminar.html', {'oferta': oferta})
+
+@login_required
+def mis_postulaciones(request):
+    usuario = request.user
+    search = request.GET.get('search', '')
+
+    postulaciones = Postulacion.objects.filter(estudiante=usuario).select_related('oferta')
+
+    if search:
+        postulaciones = postulaciones.filter(oferta__titulo__icontains=search)
+
+    return render(request, 'mis_postulaciones.html', {
+        'postulaciones': postulaciones,
+        'search': search,
+    })
+
+@login_required
+def eliminar_postulacion(request, postulacion_id):
+    postulacion = get_object_or_404(Postulacion, id=postulacion_id, estudiante=request.user)
+    postulacion.delete()
+    return redirect('mis_postulaciones')
+
+def es_admin(user):
+    return user.is_authenticated and user.is_staff
+
+@login_required
+@user_passes_test(lambda u: u.is_staff)
+def admin_postulaciones(request):
+    ofertas = OfertaLaboral.objects.filter(publicada_por=request.user)
+    return render(request, 'admin_postulaciones.html', {'ofertas': ofertas})
+
+@user_passes_test(es_admin)
+def ver_postulantes(request, oferta_id):
+    oferta = get_object_or_404(OfertaLaboral, id=oferta_id, publicada_por=request.user)
+    postulaciones = Postulacion.objects.filter(oferta=oferta)
+
+    return render(request, 'ver_postulantes.html', {
+        'oferta': oferta,
+        'postulaciones': postulaciones,
+    })
+
+@require_POST
+@user_passes_test(es_admin)
+def cambiar_estado_postulacion(request, postulacion_id):
+    postulacion = get_object_or_404(Postulacion, id=postulacion_id)
+    accion = request.POST.get('accion')
+
+    if accion == 'aceptar':
+        postulacion.estado = 'aceptado'
+    elif accion == 'rechazar':
+        postulacion.estado = 'rechazado'
+
+    postulacion.save()
+    return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
+
+@login_required
+@user_passes_test(lambda u: u.is_staff)
+def detalle_oferta_popup(request, oferta_id):
+    try:
+        oferta = OfertaLaboral.objects.get(pk=oferta_id)
+    except OfertaLaboral.DoesNotExist:
+        oferta = None
+    return render(request, 'partials/detalle_oferta_popup.html', {'oferta': oferta})
+
+@login_required
+@user_passes_test(lambda u: u.is_staff)
+def postulantes_popup(request, oferta_id):
+    oferta = get_object_or_404(OfertaLaboral, pk=oferta_id, publicada_por=request.user)
+    postulantes = oferta.postulacion_set.all().select_related('estudiante')
+    return render(request, 'partials/postulantes_popup.html', {'oferta': oferta, 'postulantes': postulantes})
