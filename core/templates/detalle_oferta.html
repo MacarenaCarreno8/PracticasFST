@@ -7,6 +7,19 @@
   <p><strong>Descripción:</strong></p>
   <p>{{ oferta.descripcion|linebreaks }}</p>
 
+    {% if user.is_authenticated and not user.is_staff %}
+    {% if ya_postulado %}
+        <button class="btn btn-outline-secondary mt-3" disabled>Ya has postulado</button>
+    {% else %}
+        <form method="post" action="{% url 'postular_oferta' oferta.id %}">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-success mt-3">Postular</button>
+        </form>
+    {% endif %}
+    {% endif %}
+
   <a href="{% url 'oportunidades' %}" class="btn btn-secondary mt-3">Volver a Oportunidades</a>
+
+    
 </div>
 {% endblock %}

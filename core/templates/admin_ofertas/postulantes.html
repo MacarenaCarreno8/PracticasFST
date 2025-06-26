@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+  <h3>Postulantes para: {{ oferta.titulo }}</h3>
+
+  {% if postulaciones %}
+    <ul class="list-group mt-3">
+      {% for postulacion in postulaciones %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+          {{ postulacion.estudiante.username|capfirst }}
+          <a href="{% url 'perfil_usuario_admin' postulacion.estudiante.id %}" class="btn btn-sm btn-outline-primary">Ver perfil</a>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>No hay postulantes para esta oferta aún.</p>
+  {% endif %}
+
+  <a href="{% url 'lista_ofertas' %}" class="btn btn-secondary mt-4">Volver</a>
+</div>
+{% endblock %}

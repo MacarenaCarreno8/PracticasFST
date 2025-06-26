@@ -1,0 +1,30 @@
+<h3>Postulantes a: {{ oferta.titulo }}</h3>
+
+<table class="table table-bordered">
+  <thead>
+    <tr>
+      <th>Nombre</th>
+      <th>Ver Perfil</th>
+      <th>CV</th>
+      <th>Estado</th>
+      <th>Acción</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for postulacion in postulaciones %}
+    <tr>
+      <td>{{ postulacion.estudiante.first_name }} {{ postulacion.estudiante.last_name }}</td>
+      <td><a href="{% url 'ver_perfil_postulante' postulacion.estudiante.id %}" class="btn btn-outline-secondary btn-sm">Ver Perfil</a></td>
+      <td><a href="{{ postulacion.estudiante.perfil.curriculum_pdf.url }}" class="btn btn-outline-dark btn-sm" download>Ver CV</a></td>
+      <td>{{ postulacion.estado }}</td>
+      <td>
+        <form method="POST" action="{% url 'cambiar_estado_postulacion' postulacion.id %}">
+          {% csrf_token %}
+          <button name="accion" value="aceptar" class="btn btn-success btn-sm">Aceptar</button>
+          <button name="accion" value="rechazar" class="btn btn-danger btn-sm">Rechazar</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>

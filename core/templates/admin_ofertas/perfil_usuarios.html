@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+  <h3>Perfil de {{ usuario.username|capfirst }}</h3>
+  <p>Email: {{ usuario.email }}</p>
+  <!-- Agrega más campos si es necesario -->
+  <a href="javascript:history.back()" class="btn btn-secondary mt-3">Volver</a>
+</div>
+{% endblock %}

@@ -19,5 +19,21 @@ urlpatterns= [
     path('publicaciones/eliminar/<int:pk>/', views.eliminar_oferta, name='eliminar_oferta'),
     path('oportunidades/', views.oportunidades, name='oportunidades'),
     path('oportunidades/<int:pk>/', views.detalle_oferta, name='detalle_oferta'),
+    path('postular/<int:oferta_id>/', views.postular_oferta, name='postular_oferta'),
+    path('admin/oferta/<int:oferta_id>/postulantes/', views.ver_postulantes_oferta, name='ver_postulantes_oferta'),
+    path('admin/usuario/<int:user_id>/', views.perfil_usuario_admin, name='perfil_usuario_admin'),
+    path('perfil/', views.perfil_usuario, name='perfil'),
+    path('perfil/', views.perfil_usuario, name='perfil_usuario'),
+    path('mis-postulaciones/', views.mis_postulaciones, name='mis_postulaciones'),
+    path('eliminar-postulacion/<int:postulacion_id>/', views.eliminar_postulacion, name='eliminar_postulacion'),
+    path('postulaciones/eliminar/<int:postulacion_id>/', views.eliminar_postulacion, name='eliminar_postulacion'),
+    path('panel/postulaciones/', views.admin_postulaciones, name='admin_postulaciones'),
+    path('panel/oferta/<int:oferta_id>/postulantes/', views.ver_postulantes, name='ver_postulantes'),
+    path('panel/postulacion/<int:postulacion_id>/estado/', views.cambiar_estado_postulacion, name='cambiar_estado_postulacion'),
+    path('panel/oferta/<int:oferta_id>/detalle-popup/', views.detalle_oferta_popup, name='detalle_oferta_popup'),
+    path('panel/oferta/<int:oferta_id>/postulantes-popup/', views.postulantes_popup, name='postulantes_popup'),
+
+
+
 
 ]
