@@ -6,9 +6,9 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth import authenticate, login as auth_login
 from django.contrib.admin.views.decorators import staff_member_required
-from django.http import HttpResponseRedirect
+from django.http import JsonResponse
 from django.views.decorators.http import require_POST
-from .models import Postulacion, OfertaLaboral, Perfil, Postulacion
+from .models import Postulacion, OfertaLaboral, Perfil
 from .forms import OfertaLaboralForm, PerfilFormPersonales, PerfilFormAcademicos, PerfilFormAdicionales, PerfilFormHabilidades, PerfilFormAreasInteres
 
 
@@ -20,24 +20,29 @@ def login(request):
         email = request.POST['email']
         password = request.POST['password']
 
-        # Buscar al usuario por email
+        # Buscar usuario por email
         try:
             user = User.objects.get(email=email)
         except User.DoesNotExist:
             messages.error(request, 'Correo no encontrado.')
             return redirect('login')
 
-        # Autenticar
         user = authenticate(request, username=user.username, password=password)
         if user is not None:
             auth_login(request, user)
             messages.success(request, 'Has iniciado sesión correctamente.')
-            return redirect('index')  # O a donde desees redirigir
+
+            # Redirige al next si viene desde una página protegida
+            next_url = request.GET.get('next')
+            if next_url:
+                return redirect(next_url)
+            return redirect('index')
         else:
             messages.error(request, 'Contraseña incorrecta.')
             return redirect('login')
     
     return render(request, 'login.html')
+
 
 def cerrar_sesion(request):
     logout(request)
@@ -97,15 +102,12 @@ def postular_oferta(request, oferta_id):
     oferta = get_object_or_404(OfertaLaboral, id=oferta_id)
     usuario = request.user
 
-    # Verifica si ya está postulado
     ya_postulado = Postulacion.objects.filter(estudiante=usuario, oferta=oferta).exists()
     if ya_postulado:
-        messages.warning(request, 'Ya has postulado a esta oferta.')
+        return JsonResponse({'exito': False, 'mensaje': 'Ya has postulado a esta oferta.'})
     else:
         Postulacion.objects.create(estudiante=usuario, oferta=oferta)
-        messages.success(request, 'Has postulado exitosamente.')
-
-    return redirect('detalle_oferta', pk=oferta_id)
+        return JsonResponse({'exito': True, 'mensaje': 'Has postulado exitosamente.'})
 
 @login_required
 def perfil_usuario(request):
@@ -326,13 +328,19 @@ def cambiar_estado_postulacion(request, postulacion_id):
     postulacion = get_object_or_404(Postulacion, id=postulacion_id)
     accion = request.POST.get('accion')
 
-    if accion == 'aceptar':
-        postulacion.estado = 'aceptado'
-    elif accion == 'rechazar':
+    if accion == 'rechazar':
         postulacion.estado = 'rechazado'
-
-    postulacion.save()
-    return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
+        postulacion.save()
+        print(f'✅ Estado cambiado a RECHAZADO para postulación ID {postulacion_id}')
+        return JsonResponse({'success': True})
+    elif accion == 'aceptar':
+        postulacion.estado = 'aceptado'
+        postulacion.save()
+        print(f'✅ Estado cambiado a ACEPTADO para postulación ID {postulacion_id}')
+        return JsonResponse({'success': True})
+    
+    print(f'❌ Acción inválida: {accion}')
+    return JsonResponse({'success': False, 'error': 'Acción inválida'}, status=400)
 
 @login_required
 @user_passes_test(lambda u: u.is_staff)

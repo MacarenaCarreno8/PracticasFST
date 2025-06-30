@@ -10,7 +10,7 @@
   <div class="card login-card p-4 shadow">
     <h3 class="text-center mb-4 text-primary">Bienvenido a Practicas FST</h3>
     
-    <form method="post" action="{% url 'login' %}">
+    <form method="post" action="{% url 'login' %}{% if request.GET.next %}?next={{ request.GET.next }}{% endif %}">
       {% csrf_token %}
       <div class="mb-3">
         <label for="email" class="form-label text-dark">Correo electrónico</label>

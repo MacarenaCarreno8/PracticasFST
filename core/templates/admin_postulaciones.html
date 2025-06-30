@@ -70,6 +70,25 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
+    // Obtener CSRF token desde cookies
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    const csrftoken = getCookie('csrftoken');
+</script>
+
+<script>
 $(document).ready(function(){
     var modalDetalle = new bootstrap.Modal(document.getElementById('modalDetalleOferta'));
     var modalPostulantes = new bootstrap.Modal(document.getElementById('modalPostulantes'));
@@ -126,6 +145,32 @@ $(document).ready(function(){
             },
             error: function(){
                 $('#contenidoPostulantes').html('<p>Error al cargar postulantes.</p>');
+            }
+        });
+    });
+
+    $(document).on('click', '.btn-rechazar', function(){
+        const btn = $(this);
+        const postulacionId = btn.data('postulacion-id');
+        const rowId = btn.data('row-id');
+
+        $.ajax({
+            url: '/panel/postulacion/' + postulacionId + '/estado/',
+            type: 'POST',
+            headers: {
+                'X-CSRFToken': csrftoken
+            },
+            data: {
+                'accion': 'rechazar'
+            },
+            success: function(){
+                // Cambiar color de fondo a rojo
+                $('#' + rowId).removeClass().addClass('list-group-item d-flex justify-content-between align-items-center bg-danger text-white');
+                // Deshabilitar botón para evitar más cambios
+                btn.prop('disabled', true).text('Rechazado');
+            },
+            error: function(){
+                alert('Error al rechazar la postulación.');
             }
         });
     });
