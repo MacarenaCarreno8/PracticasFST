@@ -33,10 +33,12 @@
                                 <td>{{ postulacion.oferta.titulo }}</td>
                                 <td>{{ postulacion.fecha_postulacion|date:"d M Y" }}</td>
                                 <td>
-                                    {% if postulacion.estado %}
-                                        {{ postulacion.estado }}
+                                    {% if postulacion.estado == 'aceptado' %}
+                                        <span class="badge bg-success">Aceptado</span>
+                                    {% elif postulacion.estado == 'rechazado' %}
+                                        <span class="badge bg-danger">Rechazado</span>
                                     {% else %}
-                                        En revisión
+                                        <span class="badge bg-secondary">En revisión</span>
                                     {% endif %}
                                 </td>
                                 <td>

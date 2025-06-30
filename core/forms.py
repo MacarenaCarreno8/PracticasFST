@@ -4,9 +4,12 @@ from .models import OfertaLaboral, Perfil, AreaInteres
 class OfertaLaboralForm(forms.ModelForm):
     class Meta:
         model = OfertaLaboral
-        fields = ['titulo', 'descripcion', 'modalidad']
+        fields = ['titulo', 'descripcion', 'modalidad', 'ciudad', 'comuna']  # agregados ciudad y comuna
         widgets = {
             'descripcion': forms.Textarea(attrs={'rows': 4}),
+            # Puedes personalizar el widget de ciudad o comuna si quieres:
+            # 'comuna': forms.Select(attrs={'class': 'form-control'}),
+            # 'ciudad': forms.TextInput(attrs={'class': 'form-control'}),
         }
 
 class PerfilForm(forms.ModelForm):

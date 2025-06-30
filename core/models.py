@@ -18,6 +18,21 @@ class OfertaLaboral(models.Model):
     ])
     fecha_publicacion = models.DateField(auto_now_add=True)
     publicada_por = models.ForeignKey(User, on_delete=models.CASCADE)
+    
+    # Nuevos campos para ubicación
+    ciudad = models.CharField(max_length=100, default='Santiago')  # puedes dejar fija Santiago o cambiar
+    comuna = models.CharField(max_length=100, choices=[
+        ('Santiago', 'Santiago'),
+        ('Las Condes', 'Las Condes'),
+        ('Providencia', 'Providencia'),
+        ('Maipú', 'Maipú'),
+        ('La Florida', 'La Florida'),
+        ('Puente Alto', 'Puente Alto'),
+        ('Ñuñoa', 'Ñuñoa'),
+        ('Recoleta', 'Recoleta'),
+        ('La Reina', 'La Reina'),
+        # Agrega las comunas que quieras de RM
+    ], default='Santiago')
 
     def __str__(self):
         return self.titulo

@@ -2,24 +2,73 @@
 {% block content %}
 <div class="container mt-4">
   <h2>{{ oferta.titulo }}</h2>
-  <p><strong>Modalidad:</strong> {{ oferta.modalidad }}</p>
-  <p><strong>Fecha publicación:</strong> {{ oferta.fecha_publicacion }}</p>
+    <p><strong>Modalidad:</strong> {{ oferta.modalidad }}</p>
+    <p><strong>Ubicación:</strong> {{ oferta.ciudad }}, {{ oferta.get_comuna_display }}</p>
+    <p><strong>Fecha publicación:</strong> {{ oferta.fecha_publicacion }}</p>
   <p><strong>Descripción:</strong></p>
   <p>{{ oferta.descripcion|linebreaks }}</p>
 
-    {% if user.is_authenticated and not user.is_staff %}
+  {% if user.is_authenticated and not user.is_staff %}
     {% if ya_postulado %}
-        <button class="btn btn-outline-secondary mt-3" disabled>Ya has postulado</button>
+      <button class="btn btn-outline-secondary mt-3" disabled>Ya has postulado</button>
     {% else %}
-        <form method="post" action="{% url 'postular_oferta' oferta.id %}">
+      <form id="formPostular" method="post" action="{% url 'postular_oferta' oferta.id %}">
         {% csrf_token %}
-        <button type="submit" class="btn btn-success mt-3">Postular</button>
-        </form>
+        <button id="btnPostular" class="btn btn-primary mt-3">Postular</button>
+      </form>
+      <div id="mensajePostulacion" class="mt-3"></div>
     {% endif %}
-    {% endif %}
+  {% endif %}
 
   <a href="{% url 'oportunidades' %}" class="btn btn-secondary mt-3">Volver a Oportunidades</a>
-
-    
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const form = document.getElementById('formPostular');
+  if (!form) return;
+
+  form.addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const btn = document.getElementById('btnPostular');
+    const mensajeDiv = document.getElementById('mensajePostulacion');
+    mensajeDiv.textContent = ''; // limpiar mensajes
+    btn.disabled = true;
+    btn.textContent = 'Procesando...';
+
+    fetch(form.action, {
+      method: 'POST',
+      headers: {
+        'X-CSRFToken': form.querySelector('[name=csrfmiddlewaretoken]').value,
+        'Accept': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest'
+      },
+      body: new FormData(form)
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.exito) {
+        btn.textContent = 'Ya has postulado';
+        btn.classList.remove('btn-primary');
+        btn.classList.add('btn-outline-secondary');
+        btn.disabled = true;
+      } else {
+        btn.textContent = 'Postular';
+        btn.disabled = false;
+      }
+      mensajeDiv.textContent = data.mensaje;
+      mensajeDiv.style.color = data.exito ? 'green' : 'red';
+    })
+    .catch(error => {
+      btn.textContent = 'Postular';
+      btn.disabled = false;
+      mensajeDiv.textContent = 'Error al postular. Intenta de nuevo.';
+      mensajeDiv.style.color = 'red';
+      console.error('Error en postulación:', error);
+    });
+  });
+});
+</script>
+
 {% endblock %}
