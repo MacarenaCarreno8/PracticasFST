@@ -92,14 +92,34 @@ body {
 
 /* ======== CARRUSEL INDEX ======== */
 
-/* Limita la altura del carrusel */
-.custom-carousel {
-  height: 150px;  /* Cambia esto según lo que necesites */
-  overflow: hidden;
+.carousel-item img {
+    width: 100%;
+    height: 400px;
+    object-fit: cover;
+    object-position: center;
 }
 
-.custom-carousel .carousel-item img {
-  height: 100% !important;         /* Ajusta a lo mismo que el contenedor */
-  object-fit: cover;     /* Esto recorta en lugar de deformar */
-  width: 100% !important;
+#comentarios-carrusel {
+  height: 300px;  /* ventana fija */
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
 }
+
+#comentarios-carrusel .scroll-content {
+  display: flex;
+  flex-direction: column;
+  animation: scroll-up 10s linear infinite;
+}
+
+@keyframes scroll-up {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(calc(-100% + 300px));
+  }
+}
+

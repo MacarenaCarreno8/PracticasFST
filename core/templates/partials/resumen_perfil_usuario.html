@@ -1,0 +1,50 @@
+{% load static %}
+<div class="container">
+    <div class="text-center mb-3">
+        {% if perfil.foto %}
+            <img src="{{ perfil.foto.url }}" class="rounded-circle" width="100" height="100">
+        {% else %}
+            <img src="{% static 'img/avatar-default.png' %}" class="rounded-circle" width="100" height="100">
+        {% endif %}
+        <h4>{{ perfil.nombres }} {{ perfil.apellidos }}</h4>
+        <p><strong>{{ perfil.carrera|default:"Carrera no definida" }}</strong></p>
+    </div>
+
+    <hr>
+    <h5>Datos Personales</h5>
+    <ul>
+        <li><strong>Género:</strong> {{ perfil.get_genero_display }}</li>
+        <li><strong>Nacionalidad:</strong> {{ perfil.nacionalidad }}</li>
+        <li><strong>País de residencia:</strong> {{ perfil.pais_residencia }}</li>
+        <li><strong>Fecha de nacimiento:</strong> {{ perfil.fecha_nacimiento }}</li>
+        <li><strong>Tipo documento:</strong> {{ perfil.get_tipo_documento_display }}</li>
+        <li><strong>Número documento:</strong> {{ perfil.numero_documento }}</li>
+        <li><strong>Teléfono:</strong> {{ perfil.telefono }}</li>
+    </ul>
+
+    <hr>
+    <h5>Datos Académicos</h5>
+    <ul>
+        <li><strong>País institución:</strong> {{ perfil.pais_institucion }}</li>
+        <li><strong>Nivel académico:</strong> {{ perfil.nivel_academico }}</li>
+        <li><strong>Área de estudio:</strong> {{ perfil.area_estudio }}</li>
+        <li><strong>Carrera pregrado:</strong> {{ perfil.carrera_pregrado }}</li>
+        <li><strong>Situación académica:</strong> {{ perfil.get_situacion_academica_display }}</li>
+        <li><strong>Año de estudio:</strong> {{ perfil.get_anio_estudio_display }}</li>
+    </ul>
+
+    <hr>
+    <h5>Datos Adicionales</h5>
+    <ul>
+        <li><strong>Estoy buscando:</strong> {{ perfil.get_estoy_buscando_display }}</li>
+        <li><strong>Experiencia laboral:</strong> {{ perfil.get_experiencia_laboral_display }}</li>
+    </ul>
+
+    <hr>
+    <h5>Habilidades</h5>
+    <ul>
+        <li><strong>Nivel de Excel:</strong> {{ perfil.get_nivel_excel_display }}</li>
+        <li><strong>Nivel de Inglés:</strong> {{ perfil.get_nivel_ingles_display }}</li>
+    </ul>
+
+</div>

@@ -3,17 +3,16 @@ from django.contrib.auth.models import User
 from django.contrib.auth import logout
 from django.shortcuts import redirect
 from django.contrib import messages
+from django.template.loader import render_to_string
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth import authenticate, login as auth_login
 from django.contrib.admin.views.decorators import staff_member_required
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.views.decorators.http import require_POST
-from .models import Postulacion, OfertaLaboral, Perfil
-from .forms import OfertaLaboralForm, PerfilFormPersonales, PerfilFormAcademicos, PerfilFormAdicionales, PerfilFormHabilidades, PerfilFormAreasInteres
+from .models import Postulacion, OfertaLaboral, Perfil, Notificacion, Comentario
+from .forms import OfertaLaboralForm, PerfilFormPersonales, PerfilFormAcademicos, PerfilFormAdicionales, PerfilFormHabilidades
 
 
-def index (request):
-    return render(request,'index.html')
 
 def login(request):
     if request.method == 'POST':
@@ -43,6 +42,22 @@ def login(request):
     
     return render(request, 'login.html')
 
+def cargar_notificaciones(request):
+    notificaciones = []
+    notificaciones_sin_leer = []
+
+    if request.user.is_authenticated and not request.user.is_staff:
+        # Simulación de notificaciones
+        notificaciones = [
+            "Tu postulación a 'Desarrollador Backend' fue aceptada.",
+            "Tu postulación a 'QA Tester' fue rechazada."
+        ]
+        notificaciones_sin_leer = notificaciones  # Simulando no leídas
+
+    return {
+        'notificaciones': notificaciones,
+        'notificaciones_sin_leer': notificaciones_sin_leer,
+    }
 
 def cerrar_sesion(request):
     logout(request)
@@ -97,17 +112,6 @@ def perfil_usuario_admin(request, user_id):
     usuario = get_object_or_404(User, pk=user_id)
     return render(request, 'admin_ofertas/perfil_usuario.html', {'usuario': usuario})
 
-@login_required
-def postular_oferta(request, oferta_id):
-    oferta = get_object_or_404(OfertaLaboral, id=oferta_id)
-    usuario = request.user
-
-    ya_postulado = Postulacion.objects.filter(estudiante=usuario, oferta=oferta).exists()
-    if ya_postulado:
-        return JsonResponse({'exito': False, 'mensaje': 'Ya has postulado a esta oferta.'})
-    else:
-        Postulacion.objects.create(estudiante=usuario, oferta=oferta)
-        return JsonResponse({'exito': True, 'mensaje': 'Has postulado exitosamente.'})
 
 @login_required
 def perfil_usuario(request):
@@ -118,7 +122,6 @@ def perfil_usuario(request):
         form_academicos = PerfilFormAcademicos(request.POST, instance=perfil)
         form_adicionales = PerfilFormAdicionales(request.POST, instance=perfil)
         form_habilidades = PerfilFormHabilidades(request.POST, instance=perfil)
-        form_interes = PerfilFormAreasInteres(request.POST, instance=perfil)
 
         if 'guardar_personales' in request.POST:
             if form_personales.is_valid():
@@ -131,6 +134,8 @@ def perfil_usuario(request):
                 form_academicos.save()
                 messages.success(request, 'Datos académicos actualizados correctamente.')
                 return redirect('perfil_usuario')
+            else:
+                print(form_academicos.errors)  # Para depurar errores de validación
 
         elif 'guardar_adicionales' in request.POST:
             if form_adicionales.is_valid():
@@ -144,18 +149,13 @@ def perfil_usuario(request):
                 messages.success(request, 'Datos de habilidades actualizados correctamente.')
                 return redirect('perfil_usuario')
 
-        elif 'guardar_interes' in request.POST:
-            if form_interes.is_valid():
-                form_interes.save()
-                messages.success(request, 'Áreas de interés actualizadas correctamente.')
-                return redirect('perfil_usuario')
 
     else:
         form_personales = PerfilFormPersonales(instance=perfil)
         form_academicos = PerfilFormAcademicos(instance=perfil)
         form_adicionales = PerfilFormAdicionales(instance=perfil)
         form_habilidades = PerfilFormHabilidades(instance=perfil)
-        form_interes = PerfilFormAreasInteres(instance=perfil)
+
 
     context = {
         'perfil': perfil,
@@ -163,7 +163,6 @@ def perfil_usuario(request):
         'form_academicos': form_academicos,
         'form_adicionales': form_adicionales,
         'form_habilidades': form_habilidades,
-        'form_interes': form_interes,
     }
 
     return render(request, 'perfil.html', context)
@@ -223,20 +222,33 @@ def mis_postulaciones(request):
     })
 
 @login_required
+@require_POST
 def postular_oferta(request, oferta_id):
-    oferta = OfertaLaboral.objects.get(id=oferta_id)
+    oferta = get_object_or_404(OfertaLaboral, id=oferta_id)
     usuario = request.user
 
-    # Verificamos si ya está postulando
     ya_postulado = Postulacion.objects.filter(estudiante=usuario, oferta=oferta).exists()
+
     if ya_postulado:
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({'exito': False, 'mensaje': 'Ya has postulado a esta oferta.'})
         messages.warning(request, 'Ya has postulado a esta oferta.')
-    else:
-        Postulacion.objects.create(estudiante=usuario, oferta=oferta)
-        messages.success(request, 'Has postulado exitosamente.')
+        return redirect('detalle_oferta', pk=oferta_id)
 
-    return redirect('ofertas')
+    Postulacion.objects.create(estudiante=usuario, oferta=oferta)
 
+    administradores = User.objects.filter(is_staff=True)
+    for admin in administradores:
+        Notificacion.objects.create(
+            usuario=admin,
+            mensaje=f"{usuario.username} ha postulado a la oferta '{oferta.titulo}'."
+        )
+
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        return JsonResponse({'exito': True, 'mensaje': 'Has postulado exitosamente.'})
+
+    messages.success(request, 'Has postulado exitosamente.')
+    return redirect('detalle_oferta', pk=oferta_id)
     
     #CRUD ADMINISTRADOR
 
@@ -300,7 +312,13 @@ def mis_postulaciones(request):
 @login_required
 def eliminar_postulacion(request, postulacion_id):
     postulacion = get_object_or_404(Postulacion, id=postulacion_id, estudiante=request.user)
+
+    if postulacion.estado != 'en_revision':
+        messages.error(request, "No puedes eliminar esta postulación porque ya fue procesada.")
+        return redirect('mis_postulaciones')
+
     postulacion.delete()
+    messages.success(request, "Postulación eliminada correctamente.")
     return redirect('mis_postulaciones')
 
 def es_admin(user):
@@ -331,16 +349,29 @@ def cambiar_estado_postulacion(request, postulacion_id):
     if accion == 'rechazar':
         postulacion.estado = 'rechazado'
         postulacion.save()
-        print(f'✅ Estado cambiado a RECHAZADO para postulación ID {postulacion_id}')
+
+        # 🔔 Crear notificación para el estudiante
+        Notificacion.objects.create(
+            usuario=postulacion.estudiante,
+            mensaje=f"Tu postulación a la oferta '{postulacion.oferta.titulo}' fue rechazada."
+        )
+
         return JsonResponse({'success': True})
+
     elif accion == 'aceptar':
         postulacion.estado = 'aceptado'
         postulacion.save()
-        print(f'✅ Estado cambiado a ACEPTADO para postulación ID {postulacion_id}')
+
+        # 🔔 Crear notificación para el estudiante
+        Notificacion.objects.create(
+            usuario=postulacion.estudiante,
+            mensaje=f"¡Felicidades! Tu postulación a la oferta '{postulacion.oferta.titulo}' fue aceptada."
+        )
+
         return JsonResponse({'success': True})
     
-    print(f'❌ Acción inválida: {accion}')
     return JsonResponse({'success': False, 'error': 'Acción inválida'}, status=400)
+
 
 @login_required
 @user_passes_test(lambda u: u.is_staff)
@@ -357,3 +388,38 @@ def postulantes_popup(request, oferta_id):
     oferta = get_object_or_404(OfertaLaboral, pk=oferta_id, publicada_por=request.user)
     postulantes = oferta.postulacion_set.all().select_related('estudiante')
     return render(request, 'partials/postulantes_popup.html', {'oferta': oferta, 'postulantes': postulantes})
+
+@login_required
+def eliminar_notificacion(request, noti_id):
+    notificacion = get_object_or_404(Notificacion, id=noti_id, usuario=request.user)
+    if request.method == "POST":
+        notificacion.delete()
+    return redirect(request.META.get('HTTP_REFERER', 'index'))
+
+@login_required
+def eliminar_todas_notificaciones(request):
+    if request.method == "POST":
+        Notificacion.objects.filter(usuario=request.user).delete()
+    return redirect(request.META.get('HTTP_REFERER', 'index'))
+
+
+@user_passes_test(es_admin)
+def resumen_perfil_usuario(request, user_id):
+    user = get_object_or_404(User, id=user_id)
+    perfil = get_object_or_404(Perfil, user=user)
+    html = render_to_string('partials/resumen_perfil_usuario.html', {
+        'usuario': user,
+        'perfil': perfil
+    }, request=request)
+    return HttpResponse(html)
+
+def index(request):
+    comentarios = Comentario.objects.all().order_by('-fecha')
+    
+    if request.method == 'POST' and request.user.is_authenticated:
+        estrellas = int(request.POST.get('estrellas'))
+        texto = request.POST.get('texto')
+        Comentario.objects.create(usuario=request.user, estrellas=estrellas, texto=texto)
+        return redirect('index')  # o donde tengas tu home
+    
+    return render(request, 'index.html', {'comentarios': comentarios})

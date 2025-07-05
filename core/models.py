@@ -134,10 +134,21 @@ class Perfil(models.Model):
     # Aquí agregamos el ManyToManyField para múltiples áreas de interés
     areas_interes = models.ManyToManyField(AreaInteres, blank=True)
 
-class Postulacion(models.Model):
-    estudiante = models.ForeignKey(User, on_delete=models.CASCADE)
-    oferta = models.ForeignKey(OfertaLaboral, on_delete=models.CASCADE)
-    fecha_postulacion = models.DateTimeField(auto_now_add=True)
+
+class Notificacion(models.Model):
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notificaciones')
+    mensaje = models.TextField()
+    leida = models.BooleanField(default=False)
+    fecha = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.user.username
+        return f"Para {self.usuario.username}: {self.mensaje[:30]}..."
+    
+class Comentario(models.Model):
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE)
+    estrellas = models.PositiveIntegerField(default=5)
+    texto = models.TextField()
+    fecha = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.usuario.username} - {self.estrellas}★"
