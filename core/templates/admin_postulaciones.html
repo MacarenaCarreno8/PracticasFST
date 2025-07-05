@@ -174,6 +174,33 @@ $(document).ready(function(){
             }
         });
     });
+    $(document).on('click', '.btn-aceptar', function(){
+        const btn = $(this);
+        const postulacionId = btn.data('postulacion-id');
+        const rowId = btn.data('row-id');
+
+        $.ajax({
+            url: '/panel/postulacion/' + postulacionId + '/estado/',
+            type: 'POST',
+            headers: {
+                'X-CSRFToken': csrftoken
+            },
+            data: {
+                'accion': 'aceptar'
+            },
+            success: function(){
+                // Cambiar color de fondo a verde
+                $('#' + rowId).removeClass().addClass('list-group-item d-flex justify-content-between align-items-center bg-success text-white');
+                // Deshabilitar botón para evitar más cambios
+                btn.prop('disabled', true).text('Aceptado');
+                // También deshabilitar y eliminar el botón de rechazar (opcional)
+                $('#'+rowId + ' .btn-rechazar').remove();
+            },
+            error: function(){
+                alert('Error al aceptar la postulación.');
+            }
+        });
+    });
 });
 </script>
 {% endblock %}

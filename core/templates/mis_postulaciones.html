@@ -42,12 +42,16 @@
                                     {% endif %}
                                 </td>
                                 <td>
-                                    <form method="POST" action="{% url 'eliminar_postulacion' postulacion.id %}" onsubmit="return confirm('¿Estás seguro de que deseas eliminar esta postulación?');">
-                                        {% csrf_token %}
-                                        <button class="btn btn-sm btn-danger" title="Eliminar">
-                                            🗑️
-                                        </button>
-                                    </form>
+                                    {% if postulacion.estado == 'en_revision' %}
+                                        <form method="POST" action="{% url 'eliminar_postulacion' postulacion.id %}" onsubmit="return confirm('¿Estás seguro de que deseas eliminar esta postulación?');">
+                                            {% csrf_token %}
+                                            <button class="btn btn-sm btn-danger" title="Eliminar">
+                                                🗑️
+                                            </button>
+                                        </form>
+                                    {% else %}
+                                        <span class="text-muted">No se puede eliminar</span>
+                                    {% endif %}
                                 </td>
                             </tr>
                             {% endfor %}

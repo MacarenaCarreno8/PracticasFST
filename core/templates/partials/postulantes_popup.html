@@ -1,6 +1,7 @@
 <h4>Postulantes para: {{ oferta.titulo }}</h4>
 {% if postulantes %}
 <ul class="list-group">
+    
     {% for postulacion in postulantes %}
     <li id="row-{{ postulacion.id }}" class="list-group-item d-flex justify-content-between align-items-center
         {% if postulacion.estado == 'rechazado' %}
@@ -11,7 +12,7 @@
     ">
         {{ postulacion.estudiante.get_full_name|default:postulacion.estudiante.username }}
         <div>
-            <a href="{% url 'perfil_usuario_admin' postulacion.estudiante.id %}" class="btn btn-sm btn-info" target="_blank">Ver Perfil</a>
+            <a href="{% url 'resumen_perfil_usuario' postulacion.estudiante.id %}" class="btn btn-sm btn-info" target="_blank">Ver Perfil</a>
             {% if postulacion.estudiante.perfil.curriculum_pdf %}
                 <a href="{{ postulacion.estudiante.perfil.curriculum_pdf.url }}" class="btn btn-sm btn-secondary" download>Ver CV</a>
             {% endif %}
@@ -34,6 +35,55 @@
     </li>
     {% endfor %}
 </ul>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    function enviarAccion(postulacionId, accion, rowId) {
+        fetch(`/panel/postulacion/${postulacionId}/estado/`, {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": '{{ csrf_token }}',
+                "Content-Type": "application/x-www-form-urlencoded",
+            },
+            body: `accion=${accion}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const row = document.getElementById(rowId);
+                if (accion === 'aceptar') {
+                    row.className = 'list-group-item d-flex justify-content-between align-items-center bg-success text-white';
+                    row.querySelector('.btn-aceptar').outerHTML = '<button class="btn btn-sm btn-success" disabled>Aceptado</button>';
+                    row.querySelector('.btn-rechazar')?.remove();
+                } else if (accion === 'rechazar') {
+                    row.className = 'list-group-item d-flex justify-content-between align-items-center bg-danger text-white';
+                    row.querySelector('.btn-rechazar').outerHTML = '<button class="btn btn-sm btn-danger" disabled>Rechazado</button>';
+                    row.querySelector('.btn-aceptar')?.remove();
+                }
+            } else {
+                alert("Error al actualizar el estado.");
+            }
+        });
+    }
+
+    document.querySelectorAll(".btn-aceptar").forEach(btn => {
+        btn.addEventListener("click", function () {
+            const postulacionId = this.dataset.postulacionId;
+            const rowId = this.dataset.rowId;
+            enviarAccion(postulacionId, 'aceptar', rowId);
+        });
+    });
+
+    document.querySelectorAll(".btn-rechazar").forEach(btn => {
+        btn.addEventListener("click", function () {
+            const postulacionId = this.dataset.postulacionId;
+            const rowId = this.dataset.rowId;
+            enviarAccion(postulacionId, 'rechazar', rowId);
+        });
+    });
+});
+</script>
+
 {% else %}
 <p>No hay postulantes para esta oferta.</p>
 {% endif %}
