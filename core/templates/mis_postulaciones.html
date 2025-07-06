@@ -33,19 +33,25 @@
                                 <td>{{ postulacion.oferta.titulo }}</td>
                                 <td>{{ postulacion.fecha_postulacion|date:"d M Y" }}</td>
                                 <td>
-                                    {% if postulacion.estado %}
-                                        {{ postulacion.estado }}
+                                    {% if postulacion.estado == 'aceptado' %}
+                                        <span class="badge bg-success">Aceptado</span>
+                                    {% elif postulacion.estado == 'rechazado' %}
+                                        <span class="badge bg-danger">Rechazado</span>
                                     {% else %}
-                                        En revisión
+                                        <span class="badge bg-secondary">En revisión</span>
                                     {% endif %}
                                 </td>
                                 <td>
-                                    <form method="POST" action="{% url 'eliminar_postulacion' postulacion.id %}" onsubmit="return confirm('¿Estás seguro de que deseas eliminar esta postulación?');">
-                                        {% csrf_token %}
-                                        <button class="btn btn-sm btn-danger" title="Eliminar">
-                                            🗑️
-                                        </button>
-                                    </form>
+                                    {% if postulacion.estado == 'en_revision' %}
+                                        <form method="POST" action="{% url 'eliminar_postulacion' postulacion.id %}" onsubmit="return confirm('¿Estás seguro de que deseas eliminar esta postulación?');">
+                                            {% csrf_token %}
+                                            <button class="btn btn-sm btn-danger" title="Eliminar">
+                                                🗑️
+                                            </button>
+                                        </form>
+                                    {% else %}
+                                        <span class="text-muted">No se puede eliminar</span>
+                                    {% endif %}
                                 </td>
                             </tr>
                             {% endfor %}

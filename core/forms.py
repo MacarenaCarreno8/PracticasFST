@@ -4,9 +4,12 @@ from .models import OfertaLaboral, Perfil, AreaInteres
 class OfertaLaboralForm(forms.ModelForm):
     class Meta:
         model = OfertaLaboral
-        fields = ['titulo', 'descripcion', 'modalidad']
+        fields = ['titulo', 'descripcion', 'modalidad', 'ciudad', 'comuna']  # agregados ciudad y comuna
         widgets = {
             'descripcion': forms.Textarea(attrs={'rows': 4}),
+            # Puedes personalizar el widget de ciudad o comuna si quieres:
+            # 'comuna': forms.Select(attrs={'class': 'form-control'}),
+            # 'ciudad': forms.TextInput(attrs={'class': 'form-control'}),
         }
 
 class PerfilForm(forms.ModelForm):
@@ -39,9 +42,9 @@ class PerfilFormAcademicos(forms.ModelForm):
     ]
 
     SITUACION_ACADEMICA_CHOICES = [
-        ('Estudiante', 'Estudiante'),
-        ('Egresado', 'Egresado'),
-        ('Titulado', 'Titulado'),
+        ('estudiante', 'Estudiante'),
+        ('egresado', 'Egresado'),
+        ('titulado', 'Titulado'),
     ]
 
     ANIO_ESTUDIO_CHOICES = [
@@ -52,13 +55,16 @@ class PerfilFormAcademicos(forms.ModelForm):
         ('5', 'Quinto año'),
     ]
 
-    nivel_academico = forms.ChoiceField(choices=NIVEL_ACADEMICO_CHOICES)
-    situacion_academica = forms.ChoiceField(choices=SITUACION_ACADEMICA_CHOICES, widget=forms.RadioSelect)
-    anio_estudio = forms.ChoiceField(choices=ANIO_ESTUDIO_CHOICES)
+    nivel_academico = forms.ChoiceField(choices=NIVEL_ACADEMICO_CHOICES, required=False)
+    situacion_academica = forms.ChoiceField(choices=SITUACION_ACADEMICA_CHOICES, widget=forms.RadioSelect, required=False)
+    anio_estudio = forms.ChoiceField(choices=ANIO_ESTUDIO_CHOICES, required=False)
 
     class Meta:
         model = Perfil
         fields = ['pais_institucion', 'nivel_academico', 'area_estudio', 'carrera_pregrado', 'situacion_academica', 'anio_estudio']
+        widgets = {
+            'situacion_academica': forms.RadioSelect(),
+        }
 
 class PerfilFormAdicionales(forms.ModelForm):
     class Meta:

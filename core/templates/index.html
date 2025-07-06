@@ -5,25 +5,114 @@
 
 {% block content %}
 <!--Carrusel-->
-<div id="carouselExampleAutoplaying" class="carousel slide custom-carousel" data-bs-ride="carousel">
-  <div class="carousel-inner">
-    <div class="carousel-item active">
-      <img src="{% static 'img/Practica.png' %}" class="d-block w-100" alt="Imagen de práctica">
+<div class="container my-4">
+  <div id="miCarrusel" class="carousel slide mx-auto" data-bs-ride="carousel" data-bs-interval="3000" style="max-width: 800px;">
+    <div class="carousel-inner">
+      <div class="carousel-item active">
+        <img src="{% static 'img/Practica2.png' %}" class="d-block w-100" alt="Imagen de práctica">
+      </div>
+      <div class="carousel-item">
+        <img src="{% static 'img/Practicante.png' %}" class="d-block w-100" alt="Imagen Practicante">
+      </div>
+      <div class="carousel-item">
+        <img src="{% static 'img/notebook.png' %}" class="d-block w-100" alt="Imagen Notebook">
+      </div>
     </div>
-    <div class="carousel-item">
-      <img src="{% static 'img/Practicante.png' %}" class="d-block w-100" alt="Imagen Practicante">
-    </div>
-    <div class="carousel-item">
-      <img src="{% static 'img/notebook.png' %}" class="d-block w-100" alt="Imagen Notebook">
-    </div>
+    <button class="carousel-control-prev" type="button" data-bs-target="#miCarrusel" data-bs-slide="prev">
+      <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+      <span class="visually-hidden">Anterior</span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#miCarrusel" data-bs-slide="next">
+      <span class="carousel-control-next-icon" aria-hidden="true"></span>
+      <span class="visually-hidden">Siguiente</span>
+    </button>
   </div>
-  <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleAutoplaying" data-bs-slide="prev">
-    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-    <span class="visually-hidden">Anterior</span>
-  </button>
-  <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleAutoplaying" data-bs-slide="next">
-    <span class="carousel-control-next-icon" aria-hidden="true"></span>
-    <span class="visually-hidden">Siguiente</span>
-  </button>
 </div>
+
+<!--Caja de comentarios ya hechos-->
+<div class="comentarios-section py-5">
+  <div class="container">
+    <div class="text-center mb-4">
+      {% if user.is_authenticated %}
+        <a href="#comentario-formulario" class="btn btn-primary">¡Coméntanos tu experiencia!</a>
+      {% else %}
+        <a href="{% url 'login' %}" class="btn btn-primary">¡Coméntanos tu experiencia!</a>
+      {% endif %}
+    </div>
+
+    <div class="card overflow-hidden" style="height: 300px; position: relative;">
+      <div id="comentarios-carrusel" style="height: 300px; overflow: hidden; position: relative;">
+        <!-- Contenedor que se mueve -->
+        <div id="scroll-content" style="position: absolute; width: 100%; top: 0; left: 0;">
+          {% for comentario in comentarios %}
+          <div class="card shadow-sm mb-3">
+            <div class="card-body">
+              <h5 class="card-title">{{ comentario.usuario.get_full_name|default:comentario.usuario.username|capfirst }}</h5>
+              <p class="mb-1">
+                {% for i in "12345"|make_list %}
+                  {% if forloop.counter <= comentario.estrellas %}
+                    <span style="color: gold;">★</span>
+                  {% else %}
+                    <span style="color: lightgray;">★</span>
+                  {% endif %}
+                {% endfor %}
+              </p>
+              <p class="card-text">{{ comentario.texto }}</p>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div> <!-- CIERRA solo el container -->
+</div> <!-- CIERRA la sección nara
+
+<!--Caja comentarios-->
+{% if user.is_authenticated %}
+  <div id="comentario-formulario" class="container my-5">
+    <h4 class="mb-3">Deja tu experiencia:</h4>
+    <form method="POST">
+      {% csrf_token %}
+      <div class="mb-3">
+        <label for="estrellas" class="form-label">Calificación:</label>
+        <select class="form-select" id="estrellas" name="estrellas" required>
+          <option value="">Selecciona</option>
+          <option value="1">1 estrella</option>
+          <option value="2">2 estrellas</option>
+          <option value="3">3 estrellas</option>
+          <option value="4">4 estrellas</option>
+          <option value="5">5 estrellas</option>
+        </select>
+      </div>
+      <div class="mb-3">
+        <label for="texto" class="form-label">Comentario:</label>
+        <textarea class="form-control" id="texto" name="texto" rows="3" required></textarea>
+      </div>
+      <button type="submit" class="btn btn-success">Enviar comentario</button>
+    </form>
+  </div>
+{% endif %}
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const scrollContent = document.getElementById('scroll-content');
+    const container = document.getElementById('comentarios-carrusel');
+
+    let scrollPos = 0;
+    const velocidad = 0.2; // Velocidad en px por frame (ajusta a gusto)
+    
+    function animarScroll() {
+      scrollPos += velocidad;
+      // Cuando hemos desplazado más que la altura del contenido, reiniciar scroll (loop)
+      if (scrollPos >= scrollContent.scrollHeight) {
+        scrollPos = -container.clientHeight;
+      }
+      scrollContent.style.transform = `translateY(${-scrollPos}px)`;
+      requestAnimationFrame(animarScroll);
+    }
+
+    animarScroll();
+  });
+</script>
+
 {% endblock %}
