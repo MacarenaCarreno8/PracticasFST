@@ -8,7 +8,7 @@ from django.contrib.auth import authenticate, login as auth_login
 from django.contrib.admin.views.decorators import staff_member_required
 from django.http import HttpResponseRedirect
 from django.views.decorators.http import require_POST
-from .models import Postulacion, OfertaLaboral, Perfil, Postulacion
+from .models import Postulacion, OfertaLaboral, Perfil
 from .forms import OfertaLaboralForm, PerfilFormPersonales, PerfilFormAcademicos, PerfilFormAdicionales, PerfilFormHabilidades, PerfilFormAreasInteres
 
 
