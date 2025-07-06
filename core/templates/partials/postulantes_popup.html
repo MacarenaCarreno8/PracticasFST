@@ -10,7 +10,8 @@
             bg-success text-white
         {% endif %}
     ">
-        {{ postulacion.estudiante.get_full_name|default:postulacion.estudiante.username }}
+        {{ postulacion.estudiante.first_name|title }} {{ postulacion.estudiante.last_name|title|default:postulacion.estudiante.username|capfirst }}
+
         <div>
             <a href="{% url 'resumen_perfil_usuario' postulacion.estudiante.id %}" class="btn btn-sm btn-info" target="_blank">Ver Perfil</a>
             {% if postulacion.estudiante.perfil.curriculum_pdf %}
