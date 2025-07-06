@@ -11,6 +11,17 @@ body {
 
 }
 
+/* === Estilo para letras del navbar === */
+.navbar .nav-link {
+    color: white !important;
+    font-weight: 500;
+}
+
+.navbar .nav-link:hover {
+    color: #ffe8cc !important; /* Un blanco cálido al pasar el mouse */
+}
+
+
 
 /* ======== LOGIN PAGE ESTILO TIPO BANCOESTADO ======== */
 
@@ -121,5 +132,21 @@ body {
   100% {
     transform: translateY(calc(-100% + 300px));
   }
+}
+
+/* ======== COMENTARIOS (reseñas de usuarios) ======== */
+.comentarios-section {
+    background-color: #F4650F; /* mismo color que navbar */
+}
+
+.comentarios-section .card {
+    border: none;
+    border-radius: 10px;
+    background-color: white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.comentarios-section .card-title {
+    font-weight: bold;
 }
 
