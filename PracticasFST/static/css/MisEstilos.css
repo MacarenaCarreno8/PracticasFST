@@ -150,3 +150,22 @@ body {
     font-weight: bold;
 }
 
+.card-body form {
+    max-width: 500px;
+    margin: 0 auto;
+}
+/*formularios de perfil de usuario para que se vean mejor*/
+.card-body form input,
+.card-body form select,
+.card-body form textarea {
+    width: 100%;
+    margin-bottom: 12px;
+    border-radius: 6px;
+    padding: 6px 10px;
+    border: 1px solid #ced4da;
+}
+
+.card-body form button {
+    width: 100%;
+    margin-top: 10px;
+}
